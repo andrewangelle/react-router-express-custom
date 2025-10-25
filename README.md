@@ -1,6 +1,6 @@
 # React Router Custom Framework
 
-This completely-not-production-ready "framework" example shows how to integrate React Router with custom bundling and server abstractions instead of using `@react-router/dev`.
+This completely-not-production-ready "framework" example shows how to integrate React Router with custom bundling and server abstractions instead of using `@react-router/dev` and rendering the framework managed bits from a POST request.
 
 [React Router Docs](https://reactrouter.com)
 
@@ -8,16 +8,14 @@ This completely-not-production-ready "framework" example shows how to integrate 
 
 ```sh
 pnpm i
+pnpm build
 pnpm  start
 ```
 
-## Goofing around with the app
+## Development
 
 ```sh
 pnpm i
 pnpm dev
 ```
 
-## Caveats
-
-I whipped this together REALLY quickly, it certainly has errors and could be more thorough, but I hope it helps!
