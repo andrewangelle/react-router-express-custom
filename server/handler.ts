@@ -12,7 +12,7 @@ import type {
   RouterContextProvider,
   ServerBuild,
 } from 'react-router';
-import { createRequestHandler as createReactRouterRequestHandler } from 'react-router';
+import { createRequestHandler } from 'react-router';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -40,7 +40,7 @@ export type RequestHandler = (
 /**
  * Returns a request handler for Express that serves the response using react router framework mode.
  */
-export function createRequestHandler({
+export function createReactRouterRequestHandler({
   build,
   getLoadContext,
   mode = process.env.NODE_ENV,
@@ -49,7 +49,7 @@ export function createRequestHandler({
   getLoadContext?: GetLoadContextFunction;
   mode?: string;
 }): RequestHandler {
-  const handleRequest = createReactRouterRequestHandler(build, mode);
+  const handleRequest = createRequestHandler(build, mode);
 
   return async (
     req: express.Request,
@@ -60,9 +60,12 @@ export function createRequestHandler({
       const request = createReactRouterRequest(req, res);
       const loadContext = await getLoadContext?.(req, res);
 
-      // Handle rendering from POST routes
       if (req.method === 'POST') {
-        // Create a new request with GET method for route rendering
+        // We expicitly want to render from POST routes
+        // React router will throw 405 by default 
+        // when attempting to handle document requests from anything other than GET
+        // Create a new request instance as a GET for react router to handle
+        // And return the response to the original incoming POST request  
         const getRequest = new Request(request.url, {
           method: 'GET',
           headers: request.headers,
