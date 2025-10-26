@@ -46,6 +46,7 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/source-map-support": "^0.5.10",
+    "@vitejs/plugin-rsc": "^0.5.1",
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",

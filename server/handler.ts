@@ -40,7 +40,7 @@ export type RequestHandler = (
 /**
  * Returns a request handler for Express that serves the response using react router framework mode.
  */
-export function createReactRouterRequestHandler({
+export function createExpressRequestHandler({
   build,
   getLoadContext,
   mode = process.env.NODE_ENV,
