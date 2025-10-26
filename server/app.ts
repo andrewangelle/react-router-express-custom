@@ -7,10 +7,20 @@ import express from 'express';
 import getPort from 'get-port';
 import morgan from 'morgan';
 import sourceMapSupport from 'source-map-support';
+import type { ViteDevServer } from 'vite';
 import { createReactRouterRequestHandler } from './handler.js';
 
-const viteDevServer = await getDevServer();
+let viteDevServer: ViteDevServer | undefined;
+
+if (process.env.NODE_ENV !== 'production') {
+  const vite = await import('vite');
+  viteDevServer = await vite.createServer({
+    server: { middlewareMode: true },
+  });
+}
+
 sourceMapSupport.install({ retrieveSourceMap });
+
 startServer();
 
 function parseNumber(raw?: string) {
@@ -18,18 +28,6 @@ function parseNumber(raw?: string) {
   const maybe = Number(raw);
   if (Number.isNaN(maybe)) return undefined;
   return maybe;
-}
-
-async function getDevServer() {
-  if (process.env.NODE_ENV === 'production') {
-    return undefined;
-  }
-
-  const vite = await import('vite');
-  const server = await vite.createServer({
-    server: { middlewareMode: true },
-  });
-  return server;
 }
 
 async function getBuild() {
@@ -56,28 +54,19 @@ function retrieveSourceMap(source: string) {
   return null;
 }
 
+function getAddress() {
+  if (process.env.HOST) return process.env.HOST;
+  return Object.values(networkInterfaces())
+    .flat()
+    .find((ip) => String(ip?.family).includes('4') && !ip?.internal)?.address;
+}
+
 async function startServer() {
-  function onListen() {
-    const address =
-      process.env.HOST ||
-      Object.values(networkInterfaces())
-        .flat()
-        .find((ip) => String(ip?.family).includes('4') && !ip?.internal)
-        ?.address;
-
-    if (!address) {
-      console.log(`[ee-ssr-serve] http://localhost:${port}`);
-    } else {
-      console.log(
-        `[ee-ssr-serve] http://localhost:${port} (http://${address}:${port})`,
-      );
-    }
-  }
-
   const port = parseNumber(process.env.PORT) ?? (await getPort({ port: 8080 }));
+  const address = getAddress();
   const build = await getBuild();
-
   const app = express();
+
   app.disable('x-powered-by');
   app.use(compression());
 
@@ -98,7 +87,23 @@ async function startServer() {
     '*',
     createReactRouterRequestHandler({
       build,
+      mode: process.env.NODE_ENV ?? 'development',
     }),
   );
-  app.listen(port, onListen);
+
+  const onListen = () => {
+    if (!address) {
+      console.log(`[ee-ssr] http://localhost:${port}`);
+    } else {
+      console.log(
+        `[ee-ssr] http://localhost:${port} (http://${address}:${port})`,
+      );
+    }
+  };
+
+  if (process.env.HOST) {
+    app.listen(port, process.env.HOST, onListen);
+  } else {
+    app.listen(port, onListen);
+  }
 }
