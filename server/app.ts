@@ -1,7 +1,24 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { networkInterfaces } from 'node:os';
+import { join, posix } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import compression from 'compression';
 import express from 'express';
+import getPort from 'get-port';
 import morgan from 'morgan';
+import sourceMapSupport from 'source-map-support';
 import { createReactRouterRequestHandler } from './handler.js';
+
+const viteDevServer = await getDevServer();
+sourceMapSupport.install({ retrieveSourceMap });
+startServer();
+
+function parseNumber(raw?: string) {
+  if (raw === undefined) return undefined;
+  const maybe = Number(raw);
+  if (Number.isNaN(maybe)) return undefined;
+  return maybe;
+}
 
 async function getDevServer() {
   if (process.env.NODE_ENV === 'production') {
@@ -15,8 +32,6 @@ async function getDevServer() {
   return server;
 }
 
-const viteDevServer = await getDevServer();
-
 async function getBuild() {
   if (viteDevServer) {
     return viteDevServer.ssrLoadModule('virtual:react-router/server-build');
@@ -26,32 +41,64 @@ async function getBuild() {
   return await import('./server/index.js');
 }
 
-const build = await getBuild();
-
-const requestHandler = createReactRouterRequestHandler({
-  build,
-});
-
-const app = express();
-app.use(compression());
-app.disable('x-powered-by');
-
-if (viteDevServer) {
-  app.use(viteDevServer.middlewares);
-} else {
-  app.use(
-    '/assets',
-    express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
-  );
+function retrieveSourceMap(source: string) {
+  const match = source.startsWith('file://');
+  if (match) {
+    const filePath = fileURLToPath(source);
+    const sourceMapPath = `${filePath}.map`;
+    if (existsSync(sourceMapPath)) {
+      return {
+        url: source,
+        map: readFileSync(sourceMapPath, 'utf8'),
+      };
+    }
+  }
+  return null;
 }
 
-app.use(express.static('build/client', { maxAge: '1h' }));
-app.use(morgan('tiny'));
+async function startServer() {
+  function onListen() {
+    const address =
+      process.env.HOST ||
+      Object.values(networkInterfaces())
+        .flat()
+        .find((ip) => String(ip?.family).includes('4') && !ip?.internal)
+        ?.address;
 
-app.use('*', requestHandler);
+    if (!address) {
+      console.log(`[ee-ssr-serve] http://localhost:${port}`);
+    } else {
+      console.log(
+        `[ee-ssr-serve] http://localhost:${port} (http://${address}:${port})`,
+      );
+    }
+  }
 
-const port = process.env.PORT || 8080;
+  const port = parseNumber(process.env.PORT) ?? (await getPort({ port: 8080 }));
+  const build = await getBuild();
 
-app.listen(port, () =>
-  console.log(`Express server listening at http://localhost:${port}`),
-);
+  const app = express();
+  app.disable('x-powered-by');
+  app.use(compression());
+
+  if (viteDevServer) {
+    app.use(viteDevServer.middlewares);
+  } else {
+    app.use(
+      posix.join(build.publicPath, 'assets'),
+      express.static(join(build.assetsBuildDirectory, 'assets'), {
+        immutable: true,
+        maxAge: '1y',
+      }),
+    );
+  }
+
+  app.use(morgan('tiny'));
+  app.all(
+    '*',
+    createReactRouterRequestHandler({
+      build,
+    }),
+  );
+  app.listen(port, onListen);
+}
