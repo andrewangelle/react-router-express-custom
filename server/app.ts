@@ -3,28 +3,33 @@ import express from 'express';
 import morgan from 'morgan';
 import { createReactRouterRequestHandler } from './handler.js';
 
+async function getDevServer() {
+  if (process.env.NODE_ENV === 'production') {
+    return undefined;
+  }
 
+  const vite = await import('vite');
+  const server = await vite.createServer({
+    server: { middlewareMode: true },
+  });
+  return server;
+}
 
-const viteDevServer =
-  process.env.NODE_ENV === 'production'
-    ? undefined
-    : await import('vite').then((vite) =>
-        vite.createServer({
-          server: { middlewareMode: true },
-        }),
-      );
+const viteDevServer = await getDevServer();
 
 async function getBuild() {
-  if(viteDevServer) {
-    return viteDevServer.ssrLoadModule('virtual:react-router/server-build')
+  if (viteDevServer) {
+    return viteDevServer.ssrLoadModule('virtual:react-router/server-build');
   }
 
   // @ts-expect-error: In production the path will be relative to /build
-  return import('./server/index.js')
+  return await import('./server/index.js');
 }
 
+const build = await getBuild();
+
 const requestHandler = createReactRouterRequestHandler({
-  build: await getBuild()
+  build,
 });
 
 const app = express();
@@ -43,12 +48,10 @@ if (viteDevServer) {
 app.use(express.static('build/client', { maxAge: '1h' }));
 app.use(morgan('tiny'));
 
-// Handle POST requests for route rendering
-app.post('*', requestHandler);
-// Handle all other requests (GET, PUT, DELETE, etc.)
 app.use('*', requestHandler);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
+
 app.listen(port, () =>
   console.log(`Express server listening at http://localhost:${port}`),
 );

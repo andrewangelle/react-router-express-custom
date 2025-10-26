@@ -59,19 +59,24 @@ export function createReactRouterRequestHandler({
     try {
       const request = createReactRouterRequest(req, res);
       const loadContext = await getLoadContext?.(req, res);
+      const url = new URL(request.url);
+      const isPostRenderRequest =
+        req.method === 'POST' && !url.pathname.startsWith('/api');
 
-      if (req.method === 'POST') {
-        // We expicitly want to render from POST routes
-        // React router will throw 405 by default 
+      if (isPostRenderRequest) {
+        // We expicitly want to handle some renders from POST routes
+        // React router will throw 405 by default
         // when attempting to handle document requests from anything other than GET
         // Create a new request instance as a GET for react router to handle
-        // And return the response to the original incoming POST request  
+        // And return the response to the original incoming POST request
         const getRequest = new Request(request.url, {
           method: 'GET',
           headers: request.headers,
         });
         const response = await handleRequest(getRequest, loadContext);
         await sendReactRouterResponse(res, response);
+
+        // handle requests as normal
       } else {
         const response = await handleRequest(request, loadContext);
         await sendReactRouterResponse(res, response);
