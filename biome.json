@@ -9,7 +9,7 @@
     "ignoreUnknown": false,
     "includes": [
       "**/server/**",
-      "**/app/**",
+      "**/src/**",
       "!**/.react-router",
       "!**/build",
       "!**/dist",

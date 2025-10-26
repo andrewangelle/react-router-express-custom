@@ -25,7 +25,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"],
+      "~/*": ["src/*"],
       "~server/*": ["./server/*"]
     },
     "noEmit": true,
