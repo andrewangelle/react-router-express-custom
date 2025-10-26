@@ -6,9 +6,29 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useFetcher,
+  useLoaderData,
 } from 'react-router';
+import type { Route } from './+types/root';
 
-export function Layout({ children }: { children: React.ReactNode }) {
+const db = { message: 'Hello world!' };
+
+export async function loader(_loaderArgs: Route.LoaderArgs) {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  return { message: db.message };
+}
+
+export async function clientAction({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  db.message = String(formData.get('message'));
+  return { message: db.message };
+}
+
+export function Layout({
+  children,
+}: Route.ComponentProps & { children: React.ReactNode }) {
+  const { message } = useLoaderData<typeof loader>();
+  const { Form, data = { message } } = useFetcher();
   return (
     <html lang="en">
       <head>
@@ -19,8 +39,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <h1>React Router Custom Framework</h1>
-
-        <Form method="post">
+        <Form method="post" action="/">
+          <p>
+            Message: <i>{data.message}</i>
+          </p>
           <fieldset>
             <input name="message" placeholder="Enter a new message" />{' '}
             <button type="submit">Update</button>
