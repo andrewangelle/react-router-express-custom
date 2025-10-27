@@ -25,6 +25,7 @@
     ]
   },
   "dependencies": {
+    "@mjackson/node-fetch-server": "^0.7.0",
     "@react-router/fs-routes": "^7.9.4",
     "@react-router/node": "^7.9.4",
     "compression": "^1.7.4",
