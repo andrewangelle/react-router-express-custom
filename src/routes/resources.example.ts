@@ -2,12 +2,22 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
 import { data } from 'react-router';
 
 export async function loader(loaderArgs: LoaderFunctionArgs) {
+  console.log({ loaderArgs });
   await new Promise((resolve) => setTimeout(resolve, 200));
 
   const isServer = typeof document === 'undefined';
   const env = isServer ? 'server' : 'client';
 
   switch (loaderArgs.request.method) {
+    case 'OPTIONS': {
+      return new Response('{}', {
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': 'http://localhost:3000',
+          'Access-Control-Allow-Credentials': 'true',
+        },
+      });
+    }
     case 'GET':
       return data(
         {

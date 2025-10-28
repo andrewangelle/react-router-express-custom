@@ -61,7 +61,8 @@ export function createExpressRequestHandler({
       const loadContext = await getLoadContext?.(req, res);
       const url = new URL(request.url);
       const isPostRenderRequest =
-        req.method === 'POST' && !url.pathname.includes('/resources');
+        req.method === 'POST' &&
+        !url.pathname.startsWith('/api/service/resources');
 
       if (isPostRenderRequest) {
         // We expicitly want to handle some renders from POST routes
