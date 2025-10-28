@@ -9,7 +9,6 @@ export async function loader(loaderArgs: LoaderFunctionArgs) {
 
   switch (loaderArgs.request.method) {
     case 'GET':
-    case 'OPTIONS':
       return data(
         {
           message: ` ${loaderArgs.request.method} handled on ${env} from loader`,

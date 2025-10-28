@@ -124,7 +124,7 @@ async function run() {
   if (isRSCServerBuild(build)) {
     app.all('*', createRequestListener(build.fetch));
   } else {
-    app.all(
+    app.use(
       '*',
       createExpressRequestHandler({
         build,

@@ -1,6 +1,5 @@
-import type { RouteConfig } from '@react-router/dev/routes';
+import { prefix, type RouteConfig } from '@react-router/dev/routes';
 import { flatRoutes } from '@react-router/fs-routes';
 
-export default [
-  ...((await flatRoutes()) satisfies RouteConfig),
-] satisfies RouteConfig;
+const routes = (await flatRoutes()) satisfies RouteConfig;
+export default [...prefix('/api/service', routes)] satisfies RouteConfig;

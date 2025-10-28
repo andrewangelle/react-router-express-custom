@@ -26,7 +26,8 @@ export async function clientAction({ request }: Route.ActionArgs) {
 export function Layout({
   children,
 }: Route.ComponentProps & { children: React.ReactNode }) {
-  const { message } = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
+  const message = loaderData?.message || 'Default message';
   const { Form, data = { message } } = useFetcher();
   return (
     <html lang="en">
@@ -49,7 +50,8 @@ export function Layout({
         </Form>
 
         <p>
-          <Link to="/">Home</Link> | <Link to="/about">About</Link>
+          <Link to="/api/service/render/home">Home</Link> |{' '}
+          <Link to="/api/service/render/about">About</Link>
         </p>
 
         <hr />
