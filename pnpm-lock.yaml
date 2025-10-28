@@ -14,6 +14,9 @@ dependencies:
   '@react-router/node':
     specifier: ^7.9.4
     version: 7.9.4(react-router@7.9.4)(typescript@5.9.3)
+  arg:
+    specifier: ^5.0.2
+    version: 5.0.2
   compression:
     specifier: ^1.7.4
     version: 1.8.1
@@ -32,6 +35,12 @@ dependencies:
   morgan:
     specifier: ^1.10.0
     version: 1.10.1
+  pathe:
+    specifier: ^2.0.3
+    version: 2.0.3
+  picocolors:
+    specifier: ^1.1.1
+    version: 1.1.1
   react:
     specifier: ^18.2.0
     version: 18.3.1
