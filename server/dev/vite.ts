@@ -13,7 +13,7 @@ const viteImportSpecifier = isReactRouterRepo()
     // file, which means that it will always resolve to Vite 6.
     `file:///${path
       .normalize(
-        require.resolve('vite/package.json', { paths: [process.cwd()] }),
+        import.meta.resolve('vite/package.json', { paths: [process.cwd()] }),
       )
       .replace('package.json', 'dist/node/index.js')}`
   : 'vite';

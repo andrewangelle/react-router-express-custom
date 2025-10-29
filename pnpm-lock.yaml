@@ -11,9 +11,9 @@ dependencies:
   '@react-router/fs-routes':
     specifier: ^7.9.4
     version: 7.9.4(@react-router/dev@7.9.4)(typescript@5.9.3)
-  '@react-router/node':
-    specifier: ^7.9.4
-    version: 7.9.4(react-router@7.9.4)(typescript@5.9.3)
+  '@remix-run/node-fetch-server':
+    specifier: ^0.11.0
+    version: 0.11.0
   arg:
     specifier: ^5.0.2
     version: 5.0.2
@@ -61,6 +61,9 @@ devDependencies:
   '@react-router/dev':
     specifier: ^7.9.4
     version: 7.9.4(@vitejs/plugin-rsc@0.5.1)(react-router@7.9.4)(typescript@5.9.3)(vite@6.4.1)
+  '@react-router/node':
+    specifier: ^7.9.4
+    version: 7.9.4(react-router@7.9.4)(typescript@5.9.3)
   '@types/compression':
     specifier: ^1.7.5
     version: 1.8.1
@@ -849,6 +852,10 @@ packages:
 
   /@remix-run/node-fetch-server@0.10.0:
     resolution: {integrity: sha512-FmYaJHQKEPrT0UFo5KaLTmrm4F6dz5DJBzRY42H93w8FpVg5zKifNWGbH+wYsyExyWVgVrOsifS7IGFtz7HkSA==}
+
+  /@remix-run/node-fetch-server@0.11.0:
+    resolution: {integrity: sha512-nCrFHVxDFioSHc0g/3m5ztwgjBt7g8qh/UwmYkDjuMePKFepMKfNGgH5S6L7iXKX+jUrf3ooVmhx3NGIoa9iYA==}
+    dev: false
 
   /@remix-run/node-fetch-server@0.9.0:
     resolution: {integrity: sha512-SoLMv7dbH+njWzXnOY6fI08dFMI5+/dQ+vY3n8RnnbdG7MdJEgiP28Xj/xWlnRnED/aB6SFw56Zop+LbmaaKqA==}
